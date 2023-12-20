@@ -9,7 +9,9 @@ async function main() {
     processStreamData(value, key, cache, queue)
   );
 
-  console.log({ cache });
+  setTimeout(() => {
+    console.log({ cache });
+  }, 1000)
 }
 
 main();

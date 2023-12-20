@@ -3,28 +3,43 @@ import {
   AggregatorEnum,
   AggregatorQueue,
   Callback,
+  Promises,
   SUM_INTERVAL,
+  MAX_CONCURRENCY_LIMIT,
 } from './types';
 import { Stream } from './stream';
+import { promiseAllLimited } from './promise';
 
 /**
  * Simulates a data stream by generating random data and invoking a callback function for each item in the stream.
  * @param callback The callback function to be invoked for each item in the stream.
  * @returns void
  */
-export function simulateDataStream(
-  callback: Callback,
-) {
+export function simulateDataStream(callback: Callback) {
+  // Generate mock data
   const data = [...Array(100).keys()]
     .map((i) => Math.floor(Math.random() * (i + 1)))
     .filter((i) => i > 0);
 
+  // Create an array of promises
+  const promises: Promises<number> = [];
+
+  // Create and process a stream of data
   let id = 0;
   const stream = new Stream(data);
   for (const item of stream.lazyLoad()) {
     const key = `${AggregatorEnum.SUM}${id++}`;
-    callback(item, key);
+    promises.push(() => callback(item, key));
   }
+
+  // Wait for all promises to resolve
+  promiseAllLimited<number>(promises, MAX_CONCURRENCY_LIMIT)
+    .then((results: number[]) => {
+      console.log({ results });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 }
 
 /**
