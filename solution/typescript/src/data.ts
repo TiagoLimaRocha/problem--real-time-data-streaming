@@ -1,32 +1,50 @@
-import { SUM_INTERVAL } from './types';
+import {
+  AggregatorCache,
+  AggregatorEnum,
+  AggregatorQueue,
+  SUM_INTERVAL,
+} from './types';
 import { Stream } from './stream';
 
-export function simulateDataStream(callback: Function) {
-  const data = [...Array(10).keys()]
+export function simulateDataStream(
+  callback: (...args: any[]) => Promise<number>,
+) {
+  const data = [...Array(100).keys()]
     .map((i) => Math.floor(Math.random() * (i + 1)))
     .filter((i) => i > 0);
 
-  console.log({ data });
-
   let id = 0;
-  let pid: NodeJS.Timeout | undefined;
-
   const stream = new Stream(data);
   for (const item of stream.lazyLoad()) {
-    callback(item);
+    const key = `${AggregatorEnum.SUM}${id++}`;
+    callback(item, key);
   }
-  clearInterval(pid);
 }
 
 export async function processStreamData(
   data: number,
-  cache: Map<string, number>,
-  key: string
-) {
+  key: string,
+  cache: AggregatorCache,
+  queue: AggregatorQueue
+): Promise<number> {
   return new Promise((resolve, reject) => {
     try {
-      let sum: number = cache.has(key) ? (cache.get(key) as number) : 0;
-      cache.set(key, sum + data);
+      // Add new element to the queue
+      queue.push({ timestamp: Date.now(), value: data });
+
+      // Remove elements older than SUM_INTERVAL seconds
+      while (
+        queue.length > 0 &&
+        queue[0].timestamp < Date.now() - SUM_INTERVAL
+      ) {
+        queue.shift();
+      }
+
+      // Calculate the sum of the queue
+      const sum = queue.reduce((acc, curr) => acc + curr.value, 0);
+
+      // Store the total sum in the cache
+      cache.set(key, sum);
       resolve(sum);
     } catch (error) {
       reject(error);

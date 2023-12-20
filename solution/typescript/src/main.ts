@@ -1,12 +1,12 @@
-import { AggregatorEnum } from './types';
+import { AggregatorCache, AggregatorQueue } from './types';
 import { simulateDataStream, processStreamData } from './data';
 
 async function main() {
-  const cache = new Map<string, number>();
-  const key = 'sum';
+  const cache: AggregatorCache = new Map<string, number>();
+  const queue: AggregatorQueue = [];
 
-  simulateDataStream((value: number) =>
-    processStreamData(value, cache, AggregatorEnum.SUM)
+  simulateDataStream((value: number, key: string) =>
+    processStreamData(value, key, cache, queue)
   );
 
   console.log({ cache });
