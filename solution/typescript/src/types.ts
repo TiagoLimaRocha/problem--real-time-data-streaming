@@ -17,3 +17,5 @@ export type QueueElement = {
 export type AggregatorQueue = Array<QueueElement>;
 
 export type AggregatorCache = Map<string, number>;
+
+export type Callback = (...args: any[]) => Promise<number>;

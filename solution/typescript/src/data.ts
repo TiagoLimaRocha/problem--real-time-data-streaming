@@ -2,12 +2,18 @@ import {
   AggregatorCache,
   AggregatorEnum,
   AggregatorQueue,
+  Callback,
   SUM_INTERVAL,
 } from './types';
 import { Stream } from './stream';
 
+/**
+ * Simulates a data stream by generating random data and invoking a callback function for each item in the stream.
+ * @param callback The callback function to be invoked for each item in the stream.
+ * @returns void
+ */
 export function simulateDataStream(
-  callback: (...args: any[]) => Promise<number>,
+  callback: Callback,
 ) {
   const data = [...Array(100).keys()]
     .map((i) => Math.floor(Math.random() * (i + 1)))
@@ -21,6 +27,15 @@ export function simulateDataStream(
   }
 }
 
+/**
+ * Processes the stream data by adding it to the queue, removing elements older than a certain interval,
+ * calculating the sum of the queue, and storing the total sum in the cache.
+ * @param data - The data to be processed.
+ * @param key - The key to store the sum in the cache.
+ * @param cache - The cache to store the sum.
+ * @param queue - The queue to add the data and calculate the sum from.
+ * @returns A promise that resolves with the calculated sum.
+ */
 export async function processStreamData(
   data: number,
   key: string,
