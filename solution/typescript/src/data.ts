@@ -65,7 +65,7 @@ export async function processStreamData(
       // Remove elements older than SUM_INTERVAL seconds
       while (
         queue.length > 0 &&
-        queue[0].timestamp < Date.now() - SUM_INTERVAL
+        Date.now() - queue[0].timestamp > SUM_INTERVAL
       ) {
         queue.shift();
       }

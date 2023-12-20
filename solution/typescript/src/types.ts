@@ -1,4 +1,4 @@
-export const SUM_INTERVAL = 10000; // 10s
+export const SUM_INTERVAL = 1 * 10000; // 10s
 export const MAX_CONCURRENCY_LIMIT = 10;
 
 export enum AggregatorEnum {
